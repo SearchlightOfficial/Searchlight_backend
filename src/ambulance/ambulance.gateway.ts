@@ -16,7 +16,7 @@ import {
   AmbulancePatientData,
 } from "./ambulance.interface";
 import { UseGuards } from "@nestjs/common";
-import { SocketAccessGuard } from "src/auth/socket.guard";
+import { AccessGuard } from "src/auth/access.guard";
 
 @WebSocketGateway({ namespace: "ambulance", cors: true })
 export class AmbulanceGateway
@@ -53,12 +53,11 @@ export class AmbulanceGateway
   }
 
   @SubscribeMessage("hospital_connect")
-  @UseGuards(SocketAccessGuard)
+  @UseGuards(AccessGuard)
   async handleHospitalConnect(
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     const uuid = client.user?.uuid;
-
     if (!uuid) {
       return;
     }

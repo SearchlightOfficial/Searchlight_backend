@@ -10,7 +10,15 @@ export class AccessStrategy extends PassportStrategy(
 ) {
   constructor(private readonly config: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req) => {
+          if (req.handshake) {
+            return req.handshake.auth.token;
+          } else {
+            return ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+          }
+        },
+      ]),
       secretOrKey: config.get("ACCESS_TOKEN_SECRET"),
       passReqToCallback: false,
       ignoreExpiration: false,
