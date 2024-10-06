@@ -54,7 +54,9 @@ export class HospitalController {
 
   @Post("name")
   @HttpCode(200)
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: "Get hospital by name" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: "Get hospital by name",
@@ -112,7 +114,9 @@ export class HospitalController {
   }
 
   @Get(":uuid")
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: "Get hospital by uuid" })
+  @ApiBearerAuth()
   @ApiParam({ name: "uuid", description: "Hospital uuid" })
   @ApiResponse({
     status: 200,

@@ -7,6 +7,7 @@ import { HospitalEntity } from "src/hospital/hospital.entity";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { AccessStrategy } from "src/auth/access.strategy";
+import { ConfigService } from "@nestjs/config";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AccessStrategy } from "src/auth/access.strategy";
     AmbulanceService,
     HospitalService,
     AccessStrategy,
+    ConfigService,
   ],
 })
 export class AmbulanceModule {}

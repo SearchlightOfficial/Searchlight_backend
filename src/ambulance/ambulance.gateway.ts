@@ -17,6 +17,7 @@ import {
 } from "./ambulance.interface";
 import { UseGuards } from "@nestjs/common";
 import { AccessGuard } from "src/auth/access.guard";
+import { ConfigService } from "@nestjs/config";
 
 @WebSocketGateway({ namespace: "ambulance", cors: true })
 export class AmbulanceGateway
@@ -28,6 +29,7 @@ export class AmbulanceGateway
   constructor(
     private readonly ambulanceService: AmbulanceService,
     private readonly hospitalService: HospitalService,
+    private readonly config: ConfigService,
   ) {}
 
   private connectedClients: Map<string, string> = new Map();
@@ -38,7 +40,8 @@ export class AmbulanceGateway
   }
 
   async handleConnection(@ConnectedSocket() client: Socket): Promise<void> {
-    console.log(`Client connected: ${client.id}`);
+    if (this.config.get("NODE_ENV") === "development")
+      console.log(`Client connected: ${client.id}`);
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket): Promise<void> {
@@ -48,7 +51,15 @@ export class AmbulanceGateway
     if (hospitalUuid) {
       await this.ambulanceService.removeAmbulanceData(hospitalUuid, socketId);
       this.connectedClients.delete(socketId);
-      this.notifyHospitalUpdate(hospitalUuid);
+
+      const hospitalSocketId =
+        await this.ambulanceService.getClient(hospitalUuid);
+
+      if (hospitalSocketId) {
+        this.server
+          .to(hospitalSocketId)
+          .emit("delete_patient_info", { ambulanceId: socketId });
+      }
     }
   }
 
@@ -116,7 +127,20 @@ export class AmbulanceGateway
       ambulanceData,
     );
 
-    this.notifyHospitalUpdate(hospitalUuid);
+    const hospitalSocketId =
+      await this.ambulanceService.getClient(hospitalUuid);
+
+    if (hospitalSocketId) {
+      this.server
+        .to(hospitalSocketId)
+        .emit("update_patient_info", ambulanceData);
+
+      client.emit("patient_info_success", {
+        success: true,
+        code: 0,
+        message: "Patient data received",
+      });
+    }
   }
 
   @SubscribeMessage("update_location")
@@ -150,7 +174,16 @@ export class AmbulanceGateway
         patientData,
       );
 
-      this.notifyHospitalUpdate(hospitalUuid);
+      const hospitalSocketId =
+        await this.ambulanceService.getClient(hospitalUuid);
+
+      if (hospitalSocketId) {
+        this.server.to(hospitalSocketId).emit("update_patient_location", {
+          ambulanceId: socketId,
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+      }
     }
   }
 
@@ -168,8 +201,6 @@ export class AmbulanceGateway
     await this.ambulanceService.removeAmbulanceData(hospitalUuid, ambulanceId);
     this.connectedClients.delete(ambulanceId);
 
-    this.notifyHospitalUpdate(hospitalUuid);
-
     this.server.to(ambulanceId).emit("hospital_disconnect", {
       success: true,
       code: 30,
@@ -179,19 +210,6 @@ export class AmbulanceGateway
     const ambulanceSocket = this.server.sockets.sockets.get(ambulanceId);
     if (ambulanceSocket) {
       ambulanceSocket.disconnect();
-    }
-  }
-
-  private async notifyHospitalUpdate(hospitalUuid: string): Promise<void> {
-    const allPatientData =
-      await this.ambulanceService.getAllAmbulanceData(hospitalUuid);
-    const hospitalSocketId =
-      await this.ambulanceService.getClient(hospitalUuid);
-
-    if (hospitalSocketId) {
-      this.server
-        .to(hospitalSocketId)
-        .emit("update_all_patient_info", allPatientData);
     }
   }
 }
