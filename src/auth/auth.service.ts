@@ -5,6 +5,7 @@ import { AccessToken, RefreshToken } from "./auth.interface";
 import { SuccessResponse } from "src/types";
 import * as bcrypt from "bcrypt";
 import { HospitalWithPassword } from "src/hospital/hospital.interface";
+import { AdminWithPassword } from "src/admin/admin.interface";
 
 @Injectable()
 export class AuthService {
@@ -13,9 +14,9 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  getRefreshToken(uuid: string): RefreshToken {
+  getRefreshToken(uuid: string, isAdmin: boolean): RefreshToken {
     const refreshToken = this.jwtService.sign(
-      { uuid },
+      { uuid, isAdmin },
       {
         secret: this.configService.get<string>("REFRESH_TOKEN_SECRET"),
         expiresIn: this.configService.get<string>("REFRESH_TOKEN_EXPIRES_IN"),
@@ -24,9 +25,9 @@ export class AuthService {
     return { refreshToken };
   }
 
-  getAccessToken(uuid: string): AccessToken {
+  getAccessToken(uuid: string, isAdmin: boolean): AccessToken {
     const accessToken = this.jwtService.sign(
-      { uuid },
+      { uuid, isAdmin },
       {
         secret: this.configService.get<string>("ACCESS_TOKEN_SECRET"),
         expiresIn: this.configService.get<string>("ACCESS_TOKEN_EXPIRES_IN"),
@@ -36,10 +37,10 @@ export class AuthService {
   }
 
   async validatePassword(
-    hospital: HospitalWithPassword,
+    account: HospitalWithPassword | AdminWithPassword,
     password: string,
   ): Promise<SuccessResponse> {
-    const result = await bcrypt.compare(hospital.password, password);
+    const result = await bcrypt.compare(password, account.password);
     if (!result) {
       return { success: false, code: 23, message: "password not matched" };
     }

@@ -31,6 +31,7 @@ import {
 } from "src/swagger/types";
 import { AccessGuard } from "src/auth/access.guard";
 import { User } from "src/decorators/user.decorator";
+import { AdminGuard } from "src/auth/admin.guard";
 
 @Controller("hospital")
 export class HospitalController {
@@ -53,7 +54,6 @@ export class HospitalController {
 
   @Post("name")
   @HttpCode(200)
-  // @UseGuards(AccessGuard)
   @ApiOperation({ summary: "Get hospital by name" })
   @ApiResponse({
     status: 200,
@@ -67,8 +67,9 @@ export class HospitalController {
   }
 
   @Post("create")
-  // @UseGuards(AccessGuard)
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: "Create hospital" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 201,
     description: "Create hospital",
@@ -81,8 +82,9 @@ export class HospitalController {
   }
 
   @Patch()
-  // @UseGuards(AccessGuard)
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: "Update hospital" })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: "Update hospital",
@@ -110,7 +112,6 @@ export class HospitalController {
   }
 
   @Get(":uuid")
-  // @UseGuards(AccessGuard)
   @ApiOperation({ summary: "Get hospital by uuid" })
   @ApiParam({ name: "uuid", description: "Hospital uuid" })
   @ApiResponse({
@@ -126,8 +127,9 @@ export class HospitalController {
 
   @Delete(":uuid")
   @HttpCode(200)
-  // @UseGuards(AccessGuard)
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: "Delete hospital" })
+  @ApiBearerAuth()
   @ApiParam({ name: "uuid", description: "Hospital uuid" })
   @ApiResponse({
     status: 200,

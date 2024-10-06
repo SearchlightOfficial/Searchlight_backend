@@ -11,22 +11,29 @@ import { AccessStrategy } from "./access.strategy";
 import { HospitalService } from "src/hospital/hospital.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { HospitalEntity } from "src/hospital/hospital.entity";
+import { AdminService } from "src/admin/admin.service";
+import { AdminEntity } from "src/admin/admin.entity";
+import { AdminLocalStrategy } from "./admin-local.strategy";
+import { AdminStrategy } from "./admin.strategy";
 
 @Module({
   imports: [
     JwtModule,
     PassportModule,
-    TypeOrmModule.forFeature([HospitalEntity]),
+    TypeOrmModule.forFeature([HospitalEntity, AdminEntity]),
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     LocalStrategy,
     RefreshStrategy,
+    AdminLocalStrategy,
     JWTStrategy,
+    AdminStrategy,
     ConfigService,
     AccessStrategy,
     HospitalService,
+    AdminService,
   ],
 })
 export class AuthModule {}

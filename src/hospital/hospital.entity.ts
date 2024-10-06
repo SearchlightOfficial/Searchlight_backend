@@ -33,7 +33,7 @@ export class HospitalEntity {
   @Column({ type: "varchar", length: 80, unique: true, nullable: false })
   email: string;
 
-  @Column({ type: "varchar", length: 200, nullable: false, select: false })
+  @Column({ type: "varchar", length: 255, nullable: false, select: false })
   password: string;
 
   @Column({ type: "varchar", length: 32, unique: true, nullable: false })

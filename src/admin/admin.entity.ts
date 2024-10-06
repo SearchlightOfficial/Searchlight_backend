@@ -33,7 +33,7 @@ export class AdminEntity {
   @Column({ type: "varchar", length: 80, unique: true, nullable: false })
   email: string;
 
-  @Column({ type: "varchar", length: 200, nullable: false, select: false })
+  @Column({ type: "varchar", length: 255, nullable: false, select: false })
   password: string;
 
   @CreateDateColumn(CREATE_DATE_COLUMN_OPTIONS)

@@ -42,7 +42,7 @@ export class AuthController {
     @User() { uuid }: { uuid: string },
     @Res({ passthrough: true }) res: Response,
   ): Promise<SuccessResponse> {
-    const { refreshToken } = this.authService.getRefreshToken(uuid);
+    const { refreshToken } = this.authService.getRefreshToken(uuid, false);
     res.cookie("refreshToken", refreshToken, {
       domain: this.configService.get("SERVICE_DOMAIN"),
       httpOnly: this.configService.get("NODE_ENV") === "production",
@@ -76,8 +76,36 @@ export class AuthController {
     type: AccessTokenType,
   })
   async getAccessToken(
-    @User() { uuid }: { uuid: string },
+    @User() { uuid, isAdmin }: { uuid: string; isAdmin: boolean },
   ): Promise<AccessToken> {
-    return this.authService.getAccessToken(uuid);
+    return this.authService.getAccessToken(uuid, isAdmin || false);
+  }
+
+  @Post("admin/login")
+  @HttpCode(200)
+  @UseGuards(AuthGuard("admin-local"))
+  @ApiOperation({ summary: "Admin login" })
+  @ApiBody({ type: Login, description: "Admin login" })
+  @ApiResponse({
+    status: 200,
+    description: "Admin login success",
+    type: SuccessResponseType,
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized",
+  })
+  async adminLogin(
+    @User() { uuid }: { uuid: string },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SuccessResponse> {
+    const { refreshToken } = this.authService.getRefreshToken(uuid, true);
+    res.cookie("refreshToken", refreshToken, {
+      domain: this.configService.get("SERVICE_DOMAIN"),
+      httpOnly: this.configService.get("NODE_ENV") === "production",
+      secure: this.configService.get("NODE_ENV") === "production",
+      maxAge: 60 * 60 * 24 * 7 * 1000,
+    });
+    return { success: true, code: 0 };
   }
 }

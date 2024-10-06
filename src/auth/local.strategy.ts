@@ -23,7 +23,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, "local") {
       throw new UnauthorizedException();
     }
     const isValid = await this.authService.validatePassword(hospital, password);
-    if (!isValid) {
+    if (!isValid.success) {
       throw new UnauthorizedException();
     }
     return { uuid: hospital.uuid };

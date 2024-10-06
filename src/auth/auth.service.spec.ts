@@ -2,7 +2,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { RegisterHospital } from "./auth.interface";
 
 describe("AuthService", () => {
   let authService: AuthService;
@@ -24,7 +23,7 @@ describe("AuthService", () => {
       const jwtSpy = jest
         .spyOn(jwtService, "sign")
         .mockReturnValue("testRefreshToken");
-      const result = authService.getRefreshToken("test");
+      const result = authService.getRefreshToken("test", false);
       expect(jwtSpy).toHaveBeenCalledWith(
         { uuid: "test" },
         {
@@ -41,7 +40,7 @@ describe("AuthService", () => {
       const jwtSpy = jest
         .spyOn(jwtService, "sign")
         .mockReturnValue("testAccessToken");
-      const result = authService.getAccessToken("test");
+      const result = authService.getAccessToken("test", false);
       expect(jwtSpy).toHaveBeenCalledWith(
         { uuid: "test" },
         {
