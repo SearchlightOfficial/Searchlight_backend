@@ -5,7 +5,6 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { LocalStrategy } from "./local.strategy";
 import { RefreshStrategy } from "./refresh.strategy";
-import { JWTStrategy } from "./jwt.strategy";
 import { ConfigService } from "@nestjs/config";
 import { AccessStrategy } from "./access.strategy";
 import { HospitalService } from "src/hospital/hospital.service";
@@ -28,7 +27,6 @@ import { AdminStrategy } from "./admin.strategy";
     LocalStrategy,
     RefreshStrategy,
     AdminLocalStrategy,
-    JWTStrategy,
     AdminStrategy,
     ConfigService,
     AccessStrategy,
